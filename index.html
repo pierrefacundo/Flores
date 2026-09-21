@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#030201">
+<title>Una sorpresa para Nuki🌻</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020201}
+body{font-family:Georgia,serif;touch-action:manipulation;color:#fff}
+canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+body:before{content:"";position:fixed;inset:-20%;z-index:1;pointer-events:none;background:
+radial-gradient(circle at 50% 78%,rgba(255,192,26,.18),transparent 27%),
+radial-gradient(circle at 15% 25%,rgba(255,224,96,.08),transparent 25%),
+radial-gradient(circle at 85% 18%,rgba(255,160,30,.08),transparent 28%);
+filter:blur(28px);animation:ambient 8s ease-in-out infinite alternate}
+body:after{content:"";position:fixed;inset:0;z-index:2;pointer-events:none;
+background:radial-gradient(circle at center,transparent 38%,rgba(0,0,0,.22) 70%,rgba(0,0,0,.78) 100%)}
+@keyframes ambient{to{transform:scale(1.12) rotate(2deg)}}
+
+#start,#wait,#final{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;text-align:center}
+#start{background:radial-gradient(circle at center,#251b05,#090703 42%,#000 78%);cursor:pointer}
+.box{width:min(90%,520px);padding:30px 25px}
+.flowerEmoji{font-size:82px;filter:drop-shadow(0 0 30px #ffd21f);animation:flowerPulse 2.2s ease-in-out infinite}
+@keyframes flowerPulse{50%{transform:scale(1.08) rotate(4deg)}}
+.kicker{font:10px Arial,sans-serif;letter-spacing:5px;color:#ffe77c;text-transform:uppercase}
+h1{font-size:clamp(30px,8vw,55px);font-weight:400;margin:16px 0 10px;text-shadow:0 0 22px #ffbd19}
+.sub{font:13px Arial,sans-serif;letter-spacing:2px;line-height:1.8;color:#fff;opacity:.68}
+.btn{display:inline-block;margin-top:24px;padding:13px 28px;border:1px solid #ffe06b77;border-radius:999px;color:#ffe88c;
+box-shadow:0 0 28px #ffcf2b22;background:#ffd42a0d;letter-spacing:2px;animation:buttonGlow 1.8s infinite}
+@keyframes buttonGlow{50%{box-shadow:0 0 40px #ffd42a66}}
+
+#wait{z-index:19;display:none;background:rgba(1,1,0,.95)}
+.waitbox{width:min(88%,500px)}
+#waitText{font-size:clamp(22px,6vw,38px);font-weight:400;line-height:1.35;min-height:110px;text-shadow:0 0 22px #ffc72c}
+.dots{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.dot{width:7px;height:7px;border-radius:50%;background:#ffd83f;box-shadow:0 0 15px #ffd83f;animation:dot 1s infinite}
+.dot:nth-child(2){animation-delay:.18s}.dot:nth-child(3){animation-delay:.36s}
+@keyframes dot{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:1;transform:translateY(-7px)}}
+.progress{width:220px;height:2px;background:#ffffff18;margin:10px auto;overflow:hidden}
+.progress i{display:block;width:0;height:100%;background:#ffd53a;box-shadow:0 0 10px #ffd53a;transition:width 1s}
+#waitSmall{font:10px Arial,sans-serif;letter-spacing:3px;color:#fff;opacity:.42}
+
+#message{position:fixed;z-index:12;top:7%;left:50%;transform:translateX(-50%);width:94%;text-align:center;opacity:0;pointer-events:none;transition:opacity 1.2s}
+#message.show{opacity:1}
+#message .tiny{font:10px Arial,sans-serif;letter-spacing:5px;color:#ffe26a;text-transform:uppercase}
+#message h2{font-size:clamp(33px,9vw,70px);font-weight:400;margin:8px 0;color:#fff1a0;text-shadow:0 0 12px #ffd21f,0 0 35px #ff9700}
+#message p{font:11px Arial,sans-serif;letter-spacing:3px;margin:0;color:#fff;opacity:.8}
+.line{height:1px;width:75px;background:#ffdf59;margin:15px auto;box-shadow:0 0 12px #ffd21f}
+
+#music{position:fixed;right:16px;top:16px;z-index:16;width:48px;height:48px;border-radius:50%;border:1px solid #fff4;
+background:#ffffff10;color:#fff;font-size:18px;backdrop-filter:blur(9px);box-shadow:0 0 18px #0009;cursor:pointer}
+
+#tapHint{position:fixed;z-index:13;bottom:22px;left:50%;transform:translateX(-50%);font:10px Arial,sans-serif;
+letter-spacing:3px;color:#ffe98a;opacity:0;transition:opacity 1s;white-space:nowrap}
+#tapHint.show{opacity:.7}
+
+#flash{position:fixed;inset:0;z-index:14;pointer-events:none;opacity:0;background:radial-gradient(circle,#fff6a9 0,rgba(255,205,40,.4) 15%,transparent 60%)}
+#flash.on{animation:flash .65s ease}
+@keyframes flash{0%{opacity:0}20%{opacity:.9}100%{opacity:0}}
+
+#final{display:none;background:radial-gradient(circle at center,#352605 0,#0b0802 42%,#000 80%);z-index:18}
+.finalBox{animation:finalIn 2s ease both}
+@keyframes finalIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:none}}
+.finalFlower{font-size:95px;filter:drop-shadow(0 0 35px #ffd21f);animation:flowerPulse 2s infinite}
+.finalBox h1{font-size:clamp(35px,9vw,70px);margin:10px 0}
+.finalBox p{font:12px Arial,sans-serif;letter-spacing:3px;line-height:1.8;opacity:.85}
+.finalBox .small{font-size:10px;letter-spacing:4px;color:#ffe57a;margin-top:20px}
+
+@media(max-width:600px){#message{top:6%}}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="start">
+ <div class="box">
+  <div class="flowerEmoji">🌻</div>
+  <div class="kicker">Hay algo preparado para ti</div>
+  <h1>¿Quieres ver una sorpresa?</h1>
+  <div class="sub">Pero tendrás que tener un poquito de paciencia...<br>prometo que valdrá la pena.</div>
+  <div class="btn">TOCA PARA DESCUBRIR ✨</div>
+ </div>
+</div>
+
+<div id="wait">
+ <div class="waitbox">
+  <div class="kicker">Un momento...</div>
+  <div id="waitText">Preparando algo especial para ti...</div>
+  <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+  <div class="progress"><i id="bar"></i></div>
+  <div id="waitSmall">NO TE VAYAS TODAVÍA 🌻</div>
+ </div>
+</div>
+
+<div id="message">
+ <div class="tiny">Para ti</div>
+ <h2 id="mainTitle">Nuki 🌻</h2>
+ <p id="mainSub">A veces las mejores sorpresas necesitan un poquito de espera.</p>
+ <div class="line"></div>
+</div>
+
+<div id="tapHint">TOCA LA PANTALLA PARA HACER BRILLAR EL MOMENTO ✨</div>
+<div id="flash"></div>
+
+<div id="final">
+ <div class="finalBox">
+  <div class="finalFlower">🌻</div>
+  <div class="kicker">Finalmente...</div>
+  <h1>Para Gianella 💛</h1>
+  <p>"Estas flores son un recordatorio de que nuestro amor florece y crece con cada día que pasa."</p>
+  <div class="small">CON MUCHO CARIÑO 🌻</div>
+ </div>
+</div>
+
+<button id="music">🎵</button>
+<audio id="bgMusic" preload="auto" loop>
+ <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const c=document.getElementById("canvas"),ctx=c.getContext("2d");
+const audio=document.getElementById("bgMusic");
+const start=document.getElementById("start"),wait=document.getElementById("wait"),final=document.getElementById("final");
+const waitText=document.getElementById("waitText"),bar=document.getElementById("bar");
+const msg=document.getElementById("message"),title=document.getElementById("mainTitle"),sub=document.getElementById("mainSub");
+const hint=document.getElementById("tapHint"),flash=document.getElementById("flash");
+
+let W,H,D=1,flowers=[],hearts=[],particles=[],petals=[],stars=[],running=false,phase=0;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const ease=t=>1-Math.pow(1-t,3);
+
+function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*D;c.height=H*D;ctx.setTransform(D,0,0,D,0,0)}
+addEventListener("resize",resize);resize();
+
+function flower(x,scale=1,delay=0){
+ flowers.push({x,base:H*1.04,h:rnd(H*.28,H*.68)*scale,size:rnd(15,30)*scale,lean:rnd(-22,22),delay,dur:rnd(1700,2700),born:performance.now(),phase:rnd(0,7)});
+}
+function createFlowers(){
+ flowers=[];
+ let n=Math.max(15,Math.floor(W/55));
+ for(let i=0;i<n;i++)flower(W*(i+.5)/n+rnd(-18,18),rnd(.55,1.2),i*130);
+}
+function point(f,p){let sway=Math.sin(performance.now()*.0018+f.phase)*f.lean*(.25+.75*p);return{x:f.x+sway,y:f.base-f.h*p}}
+
+function drawFlower(f,p){
+ let q=point(f,p),r=f.size*(.5+.78*clamp((p-.45)/.55,0,1));
+ ctx.save();ctx.strokeStyle="#31733a";ctx.lineWidth=Math.max(2,f.size*.13);ctx.lineCap="round";
+ ctx.beginPath();ctx.moveTo(f.x,f.base);ctx.bezierCurveTo(f.x-10,f.base-f.h*.35,q.x+8,f.base-f.h*.7,q.x,q.y);ctx.stroke();
+ for(let k=.3;k<.9;k+=.23){let a=point(f,k),side=(Math.floor(k*10+f.phase)%2?1:-1);ctx.save();ctx.translate(a.x,a.y);ctx.rotate(side*.62);
+  ctx.beginPath();ctx.ellipse(side*f.size*.62,0,f.size*.7,f.size*.25,0,0,Math.PI*2);ctx.fillStyle="#3b8739";ctx.fill();ctx.restore()}
+ ctx.translate(q.x,q.y);ctx.shadowBlur=14;ctx.shadowColor="#ffd21c";
+ for(let i=0;i<15;i++){ctx.save();ctx.rotate(i*Math.PI*2/15);ctx.scale(.63,1);ctx.beginPath();ctx.ellipse(0,-r*.62,r*.5,r,0,0,Math.PI*2);ctx.fillStyle=i%3===0?"#ffe66b":"#ffd52a";ctx.fill();ctx.restore()}
+ ctx.shadowBlur=4;ctx.beginPath();ctx.arc(0,0,r*.34,0,Math.PI*2);ctx.fillStyle="#744510";ctx.fill();
+ ctx.beginPath();ctx.arc(0,0,r*.17,0,Math.PI*2);ctx.fillStyle="#d78e20";ctx.fill();ctx.restore();
+}
+
+function heart(x,y,s,a=1){
+ ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.scale(s,s);
+ ctx.beginPath();ctx.moveTo(0,12);ctx.bezierCurveTo(-34,-10,-19,-30,0,-15);ctx.bezierCurveTo(19,-30,34,-10,0,12);
+ ctx.fillStyle="#ffd33e";ctx.shadowBlur=18;ctx.shadowColor="#ffbf00";ctx.fill();ctx.restore();
+}
+function addHeart(x,y,big=false){hearts.push({x,y,vx:rnd(-.8,.8),vy:rnd(.5,1.8),s:big?rnd(.5,.95):rnd(.18,.45),life:rnd(80,170),rot:rnd(0,6)})}
+function burst(x,y){
+ flash.classList.remove("on");void flash.offsetWidth;flash.classList.add("on");
+ for(let i=0;i<34;i++)particles.push({x,y,vx:rnd(-4,4),vy:rnd(-4,4),life:rnd(35,85),s:rnd(1,3.5)});
+ for(let i=0;i<13;i++)addHeart(x+rnd(-50,50),y+rnd(-30,30),true);
+ for(let i=0;i<14;i++)petals.push({x,y,vx:rnd(-3,3),vy:rnd(-4,0),life:rnd(70,140),s:rnd(5,10),r:rnd(0,6),vr:rnd(-.12,.12)});
+}
+function makeStars(){stars=[];for(let i=0;i<90;i++)stars.push({x:rnd(0,W),y:rnd(0,H),s:rnd(.4,1.7),p:rnd(0,7)})}
+
+function animate(now){
+ requestAnimationFrame(animate);ctx.clearRect(0,0,W,H);
+ let bg=ctx.createRadialGradient(W*.5,H*.72,0,W*.5,H*.55,H*.9);
+ bg.addColorStop(0,"rgba(145,94,5,.2)");bg.addColorStop(1,"rgba(0,0,0,0)");
+ ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+ stars.forEach(s=>{ctx.globalAlpha=.15+.25*Math.sin(now*.001+s.p);ctx.fillStyle="#ffeaa0";ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,7);ctx.fill()});
+ ctx.globalAlpha=1;
+
+ flowers.forEach(f=>{let p=clamp((now-f.born-f.delay)/f.dur,0,1);if(p>0)drawFlower(f,ease(p))});
+
+ // corazones cayendo permanentemente
+ if(running && Math.random()<.12)addHeart(rnd(W*.02,W*.98),-20,false);
+ hearts.forEach((q,i)=>{
+   q.y+=q.vy;q.x+=q.vx+Math.sin(now*.002+q.x)*.18;q.life-=.7;
+   heart(q.x,q.y,q.s,clamp(q.life/30,0,1));
+   if(q.life<=0||q.y>H+30)hearts.splice(i,1);
+ });
+ // partículas
+ particles.forEach((q,i)=>{
+   q.x+=q.vx;q.y+=q.vy;q.vy+=.035;q.life--;
+   ctx.globalAlpha=clamp(q.life/25,0,1);ctx.fillStyle="#ffe46a";ctx.shadowBlur=10;ctx.shadowColor="#ffd21f";
+   ctx.beginPath();ctx.arc(q.x,q.y,q.s,0,7);ctx.fill();
+   if(q.life<=0)particles.splice(i,1);
+ });
+ // pétalos
+ petals.forEach((q,i)=>{
+   q.x+=q.vx;q.y+=q.vy;q.vy+=.03;q.r+=q.vr;q.life--;
+   ctx.save();ctx.globalAlpha=clamp(q.life/25,0,1);ctx.translate(q.x,q.y);ctx.rotate(q.r);
+   ctx.fillStyle="#ffd83e";ctx.beginPath();ctx.ellipse(0,0,q.s,q.s*.43,0,0,7);ctx.fill();ctx.restore();
+   if(q.life<=0)petals.splice(i,1);
+ });
+ ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+requestAnimationFrame(animate);
+
+const messages=[
+ ["Espera...","Todavía no. Hay algo más."],
+ ["Casi...","Quiero hacerlo un poquito más especial."],
+ ["Una pequeña pista...","No mires demasiado lejos. 🌻"],
+ ["Ya falta poco...","La sorpresa está tomando forma."],
+ ["Último momento...","Quédate aquí unos segundos más. 💛"]
+];
+
+async function begin(){
+ start.style.display="none";wait.style.display="flex";running=true;makeStars();
+ try{await audio.play()}catch(e){}
+ let total=messages.length;
+ for(let i=0;i<total;i++){
+   waitText.style.opacity=0;
+   setTimeout(()=>{waitText.textContent=messages[i][0]+"\n"+messages[i][1];waitText.style.opacity=1},100);
+   bar.style.width=((i+1)/total*100)+"%";
+   await new Promise(r=>setTimeout(r,1900));
+ }
+ wait.style.display="none";
+ createFlowers();
+ msg.classList.add("show");
+ title.textContent="Nuki 🌻";
+ sub.textContent="Un pequeño detalle con el color del sol para recordarte lo valiosa que eres.";
+ hint.classList.add("show");
+ burst(W/2,H*.48);
+ for(let i=0;i<25;i++)addHeart(rnd(W*.05,W*.95),rnd(-20,H*.35),true);
+ setTimeout(()=>hint.classList.remove("show"),6000);
+ // segunda sorpresa: intensificación
+ setTimeout(()=>burst(W*.5,H*.43),4300);
+}
+
+start.addEventListener("click",begin);
+
+addEventListener("pointerdown",e=>{
+ if(!running||e.target===document.getElementById("music"))return;
+ // efecto muy visible al tocar
+ burst(e.clientX,e.clientY);
+ for(let i=0;i<12;i++)addHeart(e.clientX+rnd(-35,35),e.clientY+rnd(-25,25),i%3===0);
+});
+
+document.getElementById("music").addEventListener("click",async e=>{
+ e.stopPropagation();
+ if(audio.paused){try{await audio.play()}catch(err){}document.getElementById("music").textContent="🎵"}
+ else{audio.pause();document.getElementById("music").textContent="🔇"}
+});
+</script>
+</body>
+</html>
